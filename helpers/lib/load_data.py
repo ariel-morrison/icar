@@ -44,11 +44,12 @@ def cols_date(filename,dtype='f',year=-1,month=-1,day=-1,hour=-1,minute=-1,secon
     times=[mjul_day(years[i], months[i], days[i], hours[i], minutes[i], seconds[i]) for i in range(len(years))]
     #    times=[datetime(result[:,year],result[:,month],result[:,day],result[:,hour],result[:,minute])]
     times=np.array(times)
+    print(times)
     data=data[:,max((year,month,day,hour,minute))+1:]
     return (times, data)
 
 
-from bunch import Bunch
+from helpers.lib.bunch import Bunch
 def cols(filename,dtype='d',delimiter=None,readheader=False):
     '''
     cols: reads a text file with an arbitrary number of header lines

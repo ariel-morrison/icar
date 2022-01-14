@@ -4,15 +4,16 @@ import glob
 
 import numpy as np
 
-from models import access,ccsm,fgoals,gfdl,ipsl
-from bunch import Bunch
+from models import awi,access,ccsm,fgoals,gfdl,ipsl
+from helpers.lib.bunch import Bunch
 
 import io_routines as io
 
 version="1.0"
-
+'''
 GCM_NAMES=dict(
     access="ACCESS1-3",
+    awi="AWI-CM-1-1-MR",
     bcc="bcc-csm1-1-m",
     bnu="BNU-ESM",
     canesm="CanESM2",
@@ -30,8 +31,17 @@ GCM_NAMES=dict(
     mri_cgcm3="MRI-CGCM3",
     noresm="NorESM1-M"
 )
+'''
 
 global_vert_coords=dict(
+                        awi=awi.vcoord,
+                        cesm = ccsm.vcoord,
+                        fgoals = fgoals.vcoord,
+                        gfdl = gfdl.vcoord,
+                        ipsl = ipsl.vcoord,
+                        miroc = ccsm.vcoord
+                        )
+'''
                         access=access.vcoord,
                         bcc = ccsm.vcoord,
                         bnu = ccsm.vcoord,
@@ -49,19 +59,17 @@ global_vert_coords=dict(
                         noresm = ccsm.vcoord,
                         giss_e2h = ccsm.vcoord
                         )
-
+'''
 
 def set_bounds(info):
     atm_file=info.atmdir+info.atmfile
-    print(atm_file)
+    print("atm_file: ",atm_file)
     cmip_file= atm_file.replace("_Y_",str(info.start_year))        \
                     .replace("_VAR_","hus")                        \
                     .replace("_ENS_",info.ensemble)                \
                     .replace("_EXP_",info.experiment)              \
                     .replace("_GCM_",info.gcm_name)
-    print(cmip_file)
     cmip_file=glob.glob(cmip_file)[0]
-    print(cmip_file)
     varlist=["lat","lon"]
     
     lat=io.read_nc(cmip_file,varlist[0]).data
@@ -82,7 +90,7 @@ def set_bounds(info):
     info.lat_data=lat
     info.lon_data=lon
     
-def make_timelist(info,hrs=6.0):
+def make_timelist(info,hrs=24.0):
     dt=datetime.timedelta(hrs/24.0)
     info.ntimes=np.int(np.round((info.end_date-info.start_date).total_seconds()/60./60./hrs))
     info.times=[info.start_date+dt*i for i in range(info.ntimes)]
@@ -93,6 +101,7 @@ def update_info(info):
     
 
 def parse():
+    '''
     parser= argparse.ArgumentParser(description='Convert cmip files to ICAR input forcing files')
     parser.add_argument('model',     nargs="?",action='store',help="GCM (ccsm,giss,miroc5,...)",         default="ccsm")
     parser.add_argument('experiment',nargs="?",action='store',help="Experiment (historical,rcp85)",      default="historical")
@@ -126,8 +135,9 @@ def parse():
     start_date=datetime.datetime(start_year,1,1,0,0,0)
     end_date=datetime.datetime(start_year+nyears,1,1,0,0,0)
     
+    
     info=Bunch(lat=[float(args.lat_s),float(args.lat_n)],
-               lon=[float(args.lon_w),float(args.lon_e)],
+              lon=[float(args.lon_w),float(args.lon_e)],
                start_date=start_date,  end_date=end_date,
                start_year=int(args.start_year),experiment=args.experiment,
                ensemble=args.ensemble,
@@ -139,5 +149,26 @@ def parse():
                orog_file="orography.nc",
                output_file=args.output.replace("GCM",args.model)+args.ensemble+"_"+args.experiment+"_",
                version=version)
-    
+    '''
+    start_date=datetime.datetime(1979,1,1,0,0,0)
+    end_date=datetime.datetime(2000,1,1,0,0,0)
+
+    info=Bunch(lat=[float(45),float(72)],
+               lon=[float(-136),float(-110)],
+               start_date=start_date,  end_date=end_date,
+               start_year=int(1979),experiment="historical",
+               ensemble="r10i1p1f1",
+               model="CESM2",
+               atmdir="/net/venus/kenes/user/amorrison/icar/forcing/", #args.dir,
+               #atmfile="CESM2_input_data_historical_r10i1p1f1_195001-201412_cropped.nc",
+               atmfile="test_data_time.nc",
+               gcm_name="CESM2",
+               
+               #TBD
+               read_pressure=global_vert_coords["cesm"],
+
+               orog_file="/net/venus/kenes/user/amorrison/icar/forcing/orog_fx_CESM2_historical_r10i1p1f1_gn.nc",
+               output_file="/net/venus/kenes/user/amorrison/icar/src/CESM2_r10i1p1f1_historical_",
+               version=version)
+
     return info

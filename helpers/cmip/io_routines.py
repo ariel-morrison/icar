@@ -2,12 +2,12 @@ import subprocess,os,glob
 import gc,sys
 import numpy as np
 import netCDF4
-from bunch import Bunch
-import mygis
+from helpers.lib.bunch import Bunch
+from helpers.lib import mygis
 
 g=9.8
-atmvarlist=["ta","hus","ua","va"]
-icar_atm_var=["t","qv","u","v"]
+atmvarlist=["ta","hus","ua","va","z"]
+icar_atm_var=["t","qv","u","v","z"]
 
 # from mygis, modified to work with netCDF4
 def read_nc(filename,var="data",proj=None,returnNCvar=False):
@@ -34,6 +34,8 @@ def read_nc(filename,var="data",proj=None,returnNCvar=False):
             if len(data.shape)>2:
                 outputdata=data[:ntimes,...]
             else:
+                print(var)
+                print(data.dtype)
                 outputdata=data[:]
     outputproj=None
     if proj!=None:
@@ -107,15 +109,23 @@ def load_atm(time,info):
             outputdata[varname]=newdata
             
         outputdata.ntimes = outputdata.p.shape[0]
+
+        varname="time"
+        nc_data=read_nc(atmfile,varname)
+        newdata=nc_data.data[:]
+        if varname in outputdata:
+            outputdata[varname]=np.concatenate([outputdata[varname],newdata])
+        else:
+            outputdata[varname]=newdata
         
-    # outputdata.times=info.read_time(atmfile)
+    #outputdata.times=info.read_time(atmfile)
     try:
         calendar = mygis.read_attr(atmfile_list[0], "calendar", varname="time")
-    except KeyError,IndexError:
+    except (KeyError, IndexError):
         calendar = None
-    
+    print("calendar: ",calendar) 
     outputdata.calendar = calendar
-    
+
     return outputdata
 
 def load_sfc(time,info):

@@ -1,7 +1,7 @@
 import numpy as np
 
-import mygis
-from bunch import Bunch
+from helpers.lib import mygis
+from helpers.lib.bunch import Bunch
 
 def vcoord(filename):
     """compute the vertical coordinate in space and time for a given file"""

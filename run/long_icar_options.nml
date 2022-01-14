@@ -23,7 +23,7 @@
 
     ! Use a SLEVE vertical coordinate, where the decay of the large- and small-scale terrain influence towards model top is controlled by the decay_rate_L_topo and decay_rate_S_topo respectively (=H/s1 and H/s2), and the exponential factor n that controls compression across the z column. For higher n values, the terrain compression happens more in the mid to upper z levels (but always below flat_z_height), whereas for n=1 it is mainly at the lower levels, which may cause numerical issues if these are very thin. By setting s1=s2 a standard hybrid coordinate is obtained.
 
-    sleve = .True.
+    sleve = .False.
     terrain_smooth_windowsize = 4    ! Terrain is smoothed to obtain the large-scale terrain features
     terrain_smooth_cycles = 5
     decay_rate_L_topo = 2
@@ -36,7 +36,7 @@
     !   Sample model level thickness [m]  Bottom levels could be thicker.
     !   NB: if using gfortran put all on one line
     dz_levels = 50.,   75.,  125.,  200.,  300.,  400.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,    ! 1-20
-               500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.     ! 20-40
+               !500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.     ! 20-40
 
 /
 
@@ -45,7 +45,7 @@
 !---------------------------------------------------------
 &output_list
     ! this is a list of variable names to be written in each output file
-    names = "u","v","ta2m","hus2m", "precipitation", "swe", "snowfall"
+    names = "lat","lon","terrain","u","v","ta2m","hus2m","clt", "precipitation", "swe", "snowfall"
 
     ! These are the options for output variables.  Though they will only be output if they are computed internally
     ! "u", "v", "w_grid", "w",
@@ -60,12 +60,12 @@
     ! "canopy_water", "swe", "soil_water_content", "soil_column_total_water", "soil_temperature", "soil_deep_temperature",
     ! "land_mask", "terrain", "lat", "lon", "u_lat", "u_lon", "v_lat", "v_lon"
 
-    outputinterval = 3600   ! number of seconds between output time slices. 3600 = hourly, 2592000 = monthly
+    outputinterval = 86400.   ! number of seconds between output time slices. 3600 = hourly, 2592000 = monthly
     output_file = "output/icar_out_"    ! prefix name of output file (date will be appended)
     ! output_file_frequency = "monthly"   ! eventually this will be used to specify how frequently to create new files (not implemented yet)
 
     ! note that restart files will have ALL variables so that they can be used to restart ICAR
-    restartinterval = 24    ! number of outputs to skip restarts on
+    restartinterval = 15    ! number of outputs to skip restarts on
     restart_file = "restart/icar_rst_"    ! prefix name of restart file (date will be appended)
 /
 
@@ -81,14 +81,14 @@
     ! Warning, convection can be unstable.
     ! wishlist = No Code Present yet
 
-    pbl = 2,  ! 1=legacy (deprecated)      2=Simple (Local HP96)        3=YSU             (N/A)
-    lsm = 3,  ! 1=use prescribed fluxes    2=Simple LSM (N/A)           3=Noah LSM                  4=NoahMP (wishlist)
-    water=2,  ! 1=use prescribed (w/lsm=1) 2=Simple sea surface fluxes
-    mp  = 1,  ! 1=Thompson                 2=Simple (SB04)              3=Morrison                  4=WSM6      5=Thompson-Eidhammer
-    rad = 2,  ! 1=use prescribed fluxes    2=Simple (empirical)         3=RRTMG           (wishlist)
+    pbl = 0,  ! 1=legacy (deprecated)      2=Simple (Local HP96)        3=YSU             (N/A)
+    lsm = 0,  ! 1=use prescribed fluxes    2=Simple LSM (N/A)           3=Noah LSM                  4=NoahMP (wishlist)
+    water=0,  ! 1=use prescribed (w/lsm=1) 2=Simple sea surface fluxes
+    mp  = 2,  ! 1=Thompson                 2=Simple (SB04)              3=Morrison                  4=WSM6      5=Thompson-Eidhammer
+    rad = 0,  ! 1=use prescribed fluxes    2=Simple (empirical)         3=RRTMG           (wishlist)
     conv= 0,  ! 1=Tiedke Scheme            2=Simple Scheme (wishlist)   3=Kain-Fritsch
     adv = 1,  ! 1=Upwind                   2=MPDATA                     3=Adams-Bashforth (wishlist)
-    wind= 1   ! 1=Linear Theory
+    wind= 0   ! 1=Linear Theory
 /
 
 !---------------------------------------------------------
@@ -97,21 +97,21 @@
 &files_list
     !   This is the high-resolution input filename
     !   primary inputs from this file are lat, lon, and terrain, optionally soil and veg types
-    init_conditions_file="baseline/geo_4km_conus.nc",
+    init_conditions_file="/net/venus/kenes/user/amorrison/icar/forcing/DEM.0.25-deg_cropped.nc"
 
     !   This is a list of the boundary conditions files -  number of files must match nfiles variable above
-    boundary_files= "forcing/wrfout_d01_2001-04-01_03:00:00", "forcing/wrfout_d01_2001-06-30_03:00:00"
+    boundary_files="/net/venus/kenes/user/amorrison/icar/forcing/AWI-CM-1-1-MR_r1i1p1f1_ssp585_2016-01-01.nc",    
 
     !   This is a list of the external conditions files to be used for starting the model. Need to have same grid (!)
     ! external_files= "swe_t3_CH_2D.nc"
-    external_files = "/scratch/snx3000/bkruyt/extraction_cosmo1/NC_INIT/laf2019030600.nc"
+    !external_files = "/kenes/user/amorrison/icar/forcing_files/elev.1.5-deg.nc"
 
     !   Alternatively a separate file containing one forcing file name per line may be specified
     !   This file may be generated by :
     !       ls -1 forcing/* | sed 's/$/"/g;s/^/"/g'>file_list.txt
     !   sed is used to add " around the filename.
     !   The quotes are probably only necessary if there are special characters or spaces on the line
-    ! forcing_file_list = "file_list.txt"
+    !forcing_file_list = "/kenes/user/amorrison/icar/forcing/file_list.txt"
 
     !   Files to read "calibration" data from
     ! nsq_calibration_file = "nsq_calibration.nc",
@@ -123,31 +123,31 @@
 !---------------------------------------------------------
 &parameters
     !   Set this to the starting date of the first low-resolution forcing file
-    forcing_start_date = '2001-04-01 03:00:00',
+    forcing_start_date = '2016-01-16 12:00:00',
     !   Set this to the date to start running the model (defaults to the forcing_start_date)
-    start_date = "2001-04-02 00:00:00",
+    start_date = "2016-01-16 12:00:00",
     !   Set this to the date to stop running the model
-    end_date = "2001-04-10 00:00:00",
+    end_date = "2016-01-31 12:00:00",
     !   Calendar used by the forcing data "gregorian", "standard", "noleap", "365-day", "360-day"
-    calendar = "standard",
+    calendar = "gregorian",
 
     !   The length of an input forcing time step
-    inputinterval = 3600,   ! [s]
+    inputinterval = 2592000,   ! [s]
 
     !   The output interval
-    outputinterval = 10800,  ! [s]
+    outputinterval = 1296000.,  ! [s]
     !   The number of outputintervals (frames) that are written to one output file.
-    frames_per_outfile = 24
+    frames_per_outfile = 2
 
     !   Limit output data to near surface variables
     !   WARNING if true it is impossible to restart the run (for now)
     ! surface_io_only = False,
 
     !   The grid spacing of the high-resolution data
-    dx = 4000.0,        ! [m]
+    dx = 55500.,        ! [m]
 
     ! Specify the longitude coordinate system to use 0 = (default) don't change inputs, 1 = -180 to 180, 2 = 0 to 360, 3 = guess an appropriate value
-    longitude_system = 0  ! [0,1,2,3]
+    longitude_system = 1  ! [0,1,2,3]
 
     !   The approximate grid spacing of the forcing data
     !   only used in rm_linear_winds?
@@ -161,12 +161,12 @@
     !   if it is supplied it must be less than or equal to the number of levels specified below
     !   but it can be used to subset the number of levels used.
     !   WARNING : ICAR can be surprisingly sensitive to this parameter see Horak et al 2019 and 2020
-    nz = 15, ! []
+    nz = 19, ! []
 
-    !   Set this to true of the zvar in the input data is actually in units of geopotential height (m/s^2)
-    z_is_geopotential = False,
-    !   Set this to true of the zvar in the input data is specified on model interfaces (as WRF geopotential height is)
-    z_is_on_interface = False,
+    !   Set this to true if the zvar in the input data is actually in units of geopotential height (m/s^2)
+    z_is_geopotential = True,
+    !   Set this to true if the zvar in the input data is specified on model interfaces (as WRF geopotential height is)
+    z_is_on_interface = True,
     !   Specify that the height of the forcing data will change through the simulation (common for atmospheric model-level output)
     time_varying_z = True,
     !   Use height above ground layer to interpolate the wind field instead of height above sea level.
@@ -188,12 +188,12 @@
     ! t_offset = 300, ! [K]
 
     !   If the temperature field in the forcing data is not potential temperature, then set this flag to False
-    ! t_is_potential = .True.
+    t_is_potential = True,
 
     !   If the water vapor field in the forcing data is specific humidity instead of mixing ratio, then set this flag to true.
-    ! qv_is_spec_humidity = .False.
+    qv_is_spec_humidity = True,
     !   If the water vapor field in the forcing data is relative humidity instead of mixing ratio, then set this flag to true.
-    ! qv_is_relative_humidity = .False.
+    ! qv_is_relative_humidity = False,
 
     !   Distance to smooth winds over [m] ~100000 is reasonable
     !   larger values result in less large scale convergence/divergence in the flow field
@@ -216,30 +216,30 @@
     restart = false,
 
     !   Use density in the advection step (violates linear theory assumptions)
-    advect_density = false,
+    advect_density = False,
 
     !   Increases output print at runtime and tests domain wide values for realistic values throughout the simulation.
-    debug = false,
-    warning_level = 4, ! 0-10 increases the level of errors it warns about and quits over (slightly)
+    debug = True,
+    warning_level = 9, ! 0-10 increases the level of errors it warns about and quits over (slightly)
 
     ! controls printing of % completed for longer processes.  Nice if it is running in a console, not nice in a log file.
-    interactive=False
+    interactive = False,
 
     !   If the following are true, their respective namelists (below) will also be read in.
     !   Read parameters for advection
-    use_adv_options = true
+    use_adv_options = False
     !   Read parameters for linear theory
-    use_lt_options = true
+    use_lt_options = False
     !   Read parameters for microphysics (primarily thompson only at this point)
-    use_mp_options = true
+    use_mp_options = False
     !   Read parameters for land surface model
-    use_lsm_options = true
+    use_lsm_options = False
     !   Read parameters for online bias correction
-    use_bias_correction = false
+    use_bias_correction = False
     !   Read parameters for experimental blocked flow parameterization
-    use_block_options = false
+    use_block_options = False
 
-    use_cu_options = false
+    use_cu_options = False
 /
 
 !---------------------------------------------------------
@@ -249,31 +249,31 @@
     ! These are the names of the variables in the forcing data files
     ! variables on the mass / center grid
     time_var= "time",       ! Time                      [defined in netcdf attributes] OPTIONAL
-    latvar  = "XLAT",       ! latitude                  [degrees]
-    lonvar  = "XLONG",      ! longitude                 [degrees]
-    pvar    = "P",          ! pressure                  [Pa]
-    pbvar   = "PB",         ! base pressure state       [Pa]        OPTIONAL
-    tvar    = "T",          ! temperature               [K]   (with optional offset)
-    qvvar   = "QVAPOR",     ! water vapor mixing ratio  [kg/kg]
-    qcvar   = "QCLOUD",     ! cloud water mixing ratio  [kg/kg]     OPTIONAL
-    qrvar   = "QRAIN",      ! rain water mixing ratio   [kg/kg]     OPTIONAL
-    qsvar   = "QSNOW",      ! snow mixing ratio         [kg/kg]     OPTIONAL
-    qnrvar  = "QNRAIN",     ! rain number concentration [kg^-1]     OPTIONAL
-    qgvar   = "QGRAUP",     ! graupel mixing ratio      [kg/kg]     OPTIONAL
-    qnivar  = "QNICE",      ! ice number concentration  [kg^-1]     OPTIONAL
-    qivar   = "QICE",       ! cloud ice mixing ratio    [kg/kg]     OPTIONAL
-    hgtvar  = "HGT",        ! surface elevation         [m]
-    zvar    = "PH",         ! model level elevations    [m or m/s^2 if z_is_geopotential]
-    zbvar   = "PHB",        ! base height state         [m or m/s^2] OPTIONAL
-    sst_var = "TSK"         ! Water surface temperature [K]          OPTIONAL (used with water=2)
+    latvar  = "lat",       ! latitude                  [degrees]
+    lonvar  = "lon",      ! longitude                 [degrees]
+    pvar    = "p",          ! pressure                  [Pa]
+    !pbvar   = "ps",         ! base pressure state       [Pa]        OPTIONAL
+    tvar    = "theta",          ! temperature               [K]   (with optional offset)
+    qvvar   = "qv",     ! water vapor mixing ratio  [kg/kg]
+    qcvar   = "cloud",     ! cloud water mixing ratio  [kg/kg]     OPTIONAL
+    !qrvar   = "QRAIN",      ! rain water mixing ratio   [kg/kg]     OPTIONAL
+    !qsvar   = "QSNOW",      ! snow mixing ratio         [kg/kg]     OPTIONAL
+    !qnrvar  = "QNRAIN",     ! rain number concentration [kg^-1]     OPTIONAL
+    !qgvar   = "QGRAUP",     ! graupel mixing ratio      [kg/kg]     OPTIONAL
+    !qnivar  = "QNICE",      ! ice number concentration  [kg^-1]     OPTIONAL
+    qivar   = "ice",       ! cloud ice mixing ratio    [kg/kg]     OPTIONAL
+    hgtvar  = "hgt",        ! surface elevation         [m]
+    zvar    = "z",         ! model level elevations    [m or m/s^2 if z_is_geopotential]
+    !zbvar   = "PHB",        ! base height state         [m or m/s^2] OPTIONAL
+    !sst_var = "tas"         ! Water surface temperature [K]          OPTIONAL (used with water=2)
 
     ! WARNING, if U and V are "grid relative" (e.g. output from WRF) and on a skewed grid, this will cause problems
     ! run the helpers/wrf2icar.sh script first to rotate the wind field to be east-west, north-south relative or supply sinalpha cosalpha... this may be broken
     ! variables on the ew staggered (U) grid
-    uvar    = "U",          ! East-West wind speed      [m/s]
+    uvar    = "u",          ! East-West wind speed      [m/s]
 
     ! variables on the NS staggered (V) grid
-    vvar    = "V",          ! North-South wind speed    [m/s]
+    vvar    = "v",          ! North-South wind speed    [m/s]
 
     ! these are only used with lsm=1 (pbl should also be >0)
     ! shvar = "HFX",        ! sensible heat flux        [W/m^2]
@@ -283,24 +283,24 @@
     ! pblhvar = "PBLH",     ! Planetary boundary layer height [m]
 
     ! Radiative fluxes at the surface required with physics:rad=1
-    swdown_var = "SWDOWN",  ! Shortwave down            [W/m^2]
-    lwdown_var = "GLW",     ! Longwave down             [W/m^2]
+    !swdown_var = "SWDOWN",  ! Shortwave down            [W/m^2]
+    !lwdown_var = "GLW",     ! Longwave down             [W/m^2]
 
     ! only required for some physics code (Noah LSM, water, Tiedke, KF(?))
-    landvar = "LANDMASK",   ! land-water mask (as in WRF) 1=land, 0 or 2=water
+    !landvar = "xland",   ! land-water mask (as in WRF) 1=land, 0 or 2=water
 
     ! NOTE, these variables should be in the high-resolution initial conditions netcdf file
-    lat_hi  = "XLAT_M",     ! latitude  (mass grid)         [degrees]
-    lon_hi  = "XLONG_M",    ! longitude (mass grid)         [degrees]
-    ulat_hi = "XLAT_U",     ! latitude  (ew-staggered grid) [degrees]
-    ulon_hi = "XLONG_U",    ! longitude (ew-staggered grid) [degrees]
-    vlat_hi = "XLAT_V",     ! latitude  (ns-staggered grid) [degrees]
-    vlon_hi = "XLONG_V",    ! longitude (ns-staggered grid) [degrees]
-    hgt_hi  = "HGT_M"       ! surface elevation             [m]
+    lat_hi  = "lat",     ! latitude  (mass grid)         [degrees]
+    lon_hi  = "lon",    ! longitude (mass grid)         [degrees]
+    !ulat_hi = "XLAT_U",     ! latitude  (ew-staggered grid) [degrees]
+    !ulon_hi = "XLONG_U",    ! longitude (ew-staggered grid) [degrees]
+    !vlat_hi = "XLAT_V",     ! latitude  (ns-staggered grid) [degrees]
+    !vlon_hi = "XLONG_V",    ! longitude (ns-staggered grid) [degrees]
+    hgt_hi  = "height"       ! surface elevation             [m]
 
     ! used to rotate E-W/N-S wind fields into the ICAR high-res domain
-    ! sinalpha_var="SINALPHA"
-    ! cosalpha_var="COSALPHA"
+    !sinalpha_var="SINALPHA"
+    !cosalpha_var="COSALPHA"
 
 
     ! to use the Noah LSM the following fields should also be specified on the high-res grid
@@ -318,12 +318,12 @@
     ! linear_mask_var = "data"
 
     ! variables to read from optional external_start_file(s)
-    lat_ext      =  "lat_1",        !
-    lon_ext      =  "lon_1",        !
-    swe_ext      =  "W_SNOW"        !
-    rho_snow_ext =  "RHO_SNOW"      !
+    !lat_ext      =  "lat_1",        !
+    !lon_ext      =  "lon_1",        !
+    !swe_ext      =  "W_SNOW"        !
+    !rho_snow_ext =  "RHO_SNOW"      !
     ! tsoil2D_ext  =  "T_SO"        ! N.B. This will overwrite any input from soil_t_var or soil_deept_var  !!
-    tsoil3D_ext  =  "T_SO"          ! N.B. This will overwrite any input from soil_t_var or soil_deept_var  !!
+    !tsoil3D_ext  =  "T_SO"          ! N.B. This will overwrite any input from soil_t_var or soil_deept_var  !!
 /
 
 
@@ -477,9 +477,9 @@
     ! On the next run, the LUT can be read back in (read_LUT=True).
     ! Error checking will be performed and if the attributes above, or the spatial domain
     ! used to generate the LUT does not match the values for the current run it will regenerate the LUT.
-    read_LUT  = True    ! read the Look up table from a specified file
-    write_LUT = True    ! write the look up table to the specified file
-    LUT_filename = "Linear_Theory_LUT.nc"
+    read_LUT  = False    ! read the Look up table from a specified file
+    write_LUT = False    ! write the look up table to the specified file
+    !LUT_filename = "Linear_Theory_LUT.nc"
 /
 
 
@@ -514,8 +514,8 @@
 !---------------------------------------------------------
 &restart_info
     ! file to read for initial conditions (an ICAR output file will work)
-    restart_file = "restart/icar_1990_09_30_01-01.nc",
+    !restart_file = "restart/icar_1990_09_30_01-01.nc",
 
     ! date to start from, used to calculate position in both restart file and forcing file
-    restart_date =  1990, 9, 30, 23, 0, 0
+    !restart_date =  1990, 9, 30, 23, 0, 0
 /

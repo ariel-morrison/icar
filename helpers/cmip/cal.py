@@ -1,8 +1,8 @@
 import numpy as np
 
 import datetime
-import mygis
-from bunch import Bunch
+from helpers.lib import mygis
+from helpers.lib.bunch import Bunch
 
 days_per_month=[31,28,31,30,31,30,31,31,30,31,30,31]
 start_day_per_month=[0]

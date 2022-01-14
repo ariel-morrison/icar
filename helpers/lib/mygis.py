@@ -31,7 +31,7 @@ except ImportError:
     import Nio
     nclib=NIO
 
-from bunch import Bunch
+from helpers.lib.bunch import Bunch
 import numpy as np
 
 
@@ -494,6 +494,8 @@ def addvar(NCfile,data,varname,dims,dtype='f',attributes=None, record_dim=None):
             if (record_dim!=None) and (i==record_dim):
                 NCfile.createDimension(d,None)
             else:
+                print(varname)
+                print(data.shape[i])
                 NCfile.createDimension(d,data.shape[i])
     
     try:
@@ -539,11 +541,11 @@ def write(filename,data,dtype='f',varname="data",dims=None,units=None,attributes
     
     if dims==None:
         if len(data.shape)==1:
-            dims=('x',)
+            dims=('t',) #dims=('x',)
         if len(data.shape)==2:
             dims=('y','x')
         if len(data.shape)==3:
-            dims=('z','y','x')
+            dims=('t','y','x') #dims=('z','y','x')
         if len(data.shape)==4:
             dims=('t','z','y','x')
         if len(data.shape)>4:
@@ -571,8 +573,11 @@ def write(filename,data,dtype='f',varname="data",dims=None,units=None,attributes
     
     if extravars:
         for e in extravars:
+            print("e.name: ",e.name)
+            print("e.dims: ",e.dims)
             if 'record_dim' in e.keys():
                 this_record_dim=e.record_dim
+                print("this_record_dim: ",this_record_dim)
             else:
                 this_record_dim=None
             addvar(NCfile,e.data,e.name,e.dims,e.dtype,e.attributes, this_record_dim)

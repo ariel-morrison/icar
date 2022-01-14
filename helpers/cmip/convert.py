@@ -1,6 +1,6 @@
 import numpy as np
 import units
-from bunch import Bunch
+from helpers.lib.bunch import Bunch
 
 R=8.3144621 # J/mol/K
 cp=29.19 # J/mol/K   =1.012 J/g/K
@@ -13,13 +13,15 @@ def convert_atm(data,sfc):
     output_data.v  = data.v                   # m/s
     output_data.p  = data.p                   # Pa
     output_data.qv = data.qv                  # kg/kg
-    
+    output_data.z = data.z
+    output_data.time = data.time
+
     pii = (100000.0 / output_data.p)**(R / cp)
     output_data.t = data.t * pii              # K (converted to potential temperature)
     
-    
+    print(data.keys()) 
     if "z" in data.keys():
-        output_data.z=data.z                        # m
+        output_data.z=data.z                  # m
     else:
         print(data.ps.shape,
             sfc.hgt.shape,
@@ -44,8 +46,6 @@ def convert_atm(data,sfc):
     
     output_data.cloud= np.zeros(data.qv.shape)
     output_data.ice  = output_data.cloud
-    
-    
     
     
     return output_data

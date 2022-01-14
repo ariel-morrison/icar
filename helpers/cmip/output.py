@@ -1,6 +1,6 @@
 import numpy as np
-import mygis
-from bunch import Bunch
+from helpers.lib import mygis
+from helpers.lib.bunch import Bunch
 
 def write_file(date,info,cmip):
     """writes cmip input data to a netcdf file"""
@@ -10,7 +10,7 @@ def write_file(date,info,cmip):
     dims=("time","level","lat","lon")
     dims_3d=("time","lat","lon")
     dims_2d=("lat","lon")
-    
+    dimsTime=("time",)    
     extra_vars=[]
     # 3D variables (+time)
     # cloud,ice,qv,u,v,t,p
@@ -55,6 +55,10 @@ def write_file(date,info,cmip):
     
     atts=Bunch(long_name="longitude",units="degrees")
     extra_vars.append(Bunch(name="lon",data=info.lon_data,dims=dims_2d,dtype="f",attributes=atts))
+    
+    #atts=Bunch(long_name="time",units="days since 0001-01-01 00:00:00")
+    atts=Bunch(long_name="time",units="days since 1850-01-01 00:00:00")
+    extra_vars.append(Bunch(name="time",data=cmip['time'],dims=dimsTime,dtype="f",attributes=atts))
 
     atts=Bunch(long_name="xland",units="")
     extra_vars.append(Bunch(name="xland",data=cmip["land"],dims=dims_2d,dtype="f",attributes=atts))
