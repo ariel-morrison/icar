@@ -26,6 +26,8 @@ NETCDF4="netCDF4"
 NIO="Nio"
 try:
     from netCDF4 import Dataset
+    from datetime import datetime,timedelta
+    from cftime import num2date,date2num
     nclib=NETCDF4
 except ImportError:
     import Nio
@@ -475,16 +477,17 @@ def _write_one_var(NCfile,data,varname="data",units=None,dtype='f',dims=('t','z'
     for n,dim in zip(dimlen,dims):
         NCfile.createDimension(dim, n)
     try:
-        fill_value=attributes["_FillValue"]
+        fill_value=attributes["fill_value"]
     except:
         fill_value=None
+        #fill_value=-999.
     NCfile.createVariable(varname,dtype,dims,fill_value=fill_value)
     NCfile.variables[varname][:]=data.astype(dtype)
     if units!=None:
         NCfile.variables[varname].units=units
     if attributes:
         for k in attributes.keys():
-            if k!="_FillValue":
+            if k!="fill_value":
                 NCfile.variables[varname].__setattr__(k,attributes[k])
 
 
@@ -499,14 +502,16 @@ def addvar(NCfile,data,varname,dims,dtype='f',attributes=None, record_dim=None):
                 NCfile.createDimension(d,data.shape[i])
     
     try:
-        fill_value=attributes["_FillValue"]
+        fill_value=attributes["fill_value"]
+        print("fill_value:",fill_value)
     except:
         fill_value=None
+        #fill_value=-999.
     NCfile.createVariable(varname,dtype,dims,fill_value=fill_value)
     NCfile.variables[varname][:]=data.astype(dtype)
     if attributes:
         for k in attributes.keys():
-            if k!="_FillValue":
+            if k!="fill_value":
                 NCfile.variables[varname].__setattr__(k,attributes[k])
 
 def write(filename,data,dtype='f',varname="data",dims=None,units=None,attributes=None, record_dim=None,
@@ -573,8 +578,8 @@ def write(filename,data,dtype='f',varname="data",dims=None,units=None,attributes
     
     if extravars:
         for e in extravars:
-            print("e.name: ",e.name)
-            print("e.dims: ",e.dims)
+            #print("e.name: ",e.name)
+            #print("e.dims: ",e.dims)
             if 'record_dim' in e.keys():
                 this_record_dim=e.record_dim
                 print("this_record_dim: ",this_record_dim)

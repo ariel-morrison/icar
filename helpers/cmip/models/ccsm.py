@@ -11,6 +11,7 @@ def vcoord(filename):
     #p0= mygis.read_nc(filename,"p0").data
     ps= mygis.read_nc(filename,"ps").data[:,na,:,:]
     #p= a*p0+b*ps
-    p = plev/ps
+    p = (plev/ps)*ps
+    #p = plev
     return p
 

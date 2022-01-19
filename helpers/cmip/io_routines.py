@@ -6,8 +6,8 @@ from helpers.lib.bunch import Bunch
 from helpers.lib import mygis
 
 g=9.8
-atmvarlist=["ta","hus","ua","va","z"]
-icar_atm_var=["t","qv","u","v","z"]
+atmvarlist=["ta","hus","ua","va","zg","clw","cli"]
+icar_atm_var=["t","qv","u","v","z","cloud","ice"]
 
 # from mygis, modified to work with netCDF4
 def read_nc(filename,var="data",proj=None,returnNCvar=False):
@@ -56,7 +56,6 @@ def find_atm_file(time,varname,info):
     file_base= file_base.replace("_EXP_",info.experiment)
     atm_file = file_base.replace("_ENS_",info.ensemble)
     
-    print(atm_file)
     filelist = glob.glob(atm_file)
     filelist.sort()
     return filelist
@@ -70,7 +69,6 @@ def find_sst_file(time,info):
     file_base= file_base.replace("_EXP_",info.experiment)
     sst_file = file_base.replace("_ENS_",info.ensemble)
     
-    print(sst_file)
     filelist=glob.glob(sst_file)
     filelist.sort()
     return filelist
@@ -84,6 +82,7 @@ def load_atm(time,info):
     for s,v in zip(icar_atm_var,atmvarlist):
         atmfile_list=find_atm_file(time,v,info)
         for atmfile in atmfile_list:
+            sys.stdout.flush()
             nc_data=read_nc(atmfile,v)#,returnNCvar=True)
             newdata=nc_data.data[:,:,info.ymin:info.ymax,info.xmin:info.xmax]
             if s in outputdata:
@@ -93,7 +92,7 @@ def load_atm(time,info):
 
     outputdata.ntimes=0
     for atmfile in atmfile_list:
-        varname="ps"
+        varname="psl"
         nc_data=read_nc(atmfile,varname)
         newdata=nc_data.data[:,info.ymin:info.ymax,info.xmin:info.xmax]
         if varname in outputdata:
@@ -107,7 +106,6 @@ def load_atm(time,info):
             outputdata[varname]=np.concatenate([outputdata[varname],newdata])
         else:
             outputdata[varname]=newdata
-            
         outputdata.ntimes = outputdata.p.shape[0]
 
         varname="time"
@@ -118,6 +116,23 @@ def load_atm(time,info):
         else:
             outputdata[varname]=newdata
         
+        #to read cloud info:
+        varname="clw"
+        nc_data=read_nc(atmfile,varname)
+        newdata=nc_data.data[:,:,info.ymin:info.ymax,info.xmin:info.xmax]
+        if varname in outputdata:
+            outputdata[varname]=np.concatenate([outputdata[varname],newdata])
+        else:
+            outputdata[varname]=newdata
+            
+        varname="cli"
+        nc_data=read_nc(atmfile,varname)
+        newdata=nc_data.data[:,:,info.ymin:info.ymax,info.xmin:info.xmax]
+        if varname in outputdata:
+            outputdata[varname]=np.concatenate([outputdata[varname],newdata])
+        else:
+            outputdata[varname]=newdata
+
     #outputdata.times=info.read_time(atmfile)
     try:
         calendar = mygis.read_attr(atmfile_list[0], "calendar", varname="time")
@@ -132,18 +147,20 @@ def load_sfc(time,info):
     """docstring for load_sfc"""
     outputdata=Bunch()
     basefile=info.orog_file
+    
     outputdata.hgt=read_nc(basefile,"orog").data[info.ymin:info.ymax,info.xmin:info.xmax]
     # sstfile=find_sst_file(time)
     # outputdata.sst=read_nc(sstfile,"sst").data[:,info.ymin:info.ymax,info.xmin:info.xmax]
 
-    outputdata.land=np.zeros(outputdata.hgt.shape)
+    outputdata.ps=read_nc(basefile,"psl").data[:,info.ymin:info.ymax,info.xmin:info.xmax]
+
+    outputdata.xland=np.zeros(outputdata.hgt.shape)
     landfrac=read_nc(basefile,"sftlf").data[info.ymin:info.ymax,info.xmin:info.xmax]
-    outputdata.land[landfrac>=0.5]=1
+    outputdata.xland[landfrac>=0.5]=1
     return outputdata
 
 def load_data(time,info):
     """docstring for load_data"""
-    print(time)
     atm=load_atm(time,info)
     sfc=load_sfc(time,info)
     return Bunch(sfc=sfc,atm=atm)

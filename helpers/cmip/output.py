@@ -34,11 +34,14 @@ def write_file(date,info,cmip):
     atts=Bunch(long_name="V (N/S) wind speed",units="m s**-1")
     extra_vars.append(Bunch(name="v",data=cmip["v"],dims=dims,dtype="f",attributes=atts))
 
-    atts=Bunch(long_name="Potential Temperature",units="kg kg**-1")
+    atts=Bunch(long_name="Potential Temperature",units="K")
     extra_vars.append(Bunch(name="theta",data=cmip["t"],dims=dims,dtype="f",attributes=atts))
 
     atts=Bunch(long_name="Pressure",units="Pa")
     extra_vars.append(Bunch(name="p",data=cmip["p"],dims=dims,dtype="f",attributes=atts))
+    
+    atts=Bunch(long_name="Surface pressure",units="Pa")
+    extra_vars.append(Bunch(name="ps",data=cmip["ps"],dims=dims_3d,dtype="f",attributes=atts))
 
     atts=Bunch(long_name="Layer thicknesses",units="m")
     extra_vars.append(Bunch(name="dz",data=cmip["dz"].astype("f"),dims=dims,dtype="f",attributes=atts))
@@ -55,17 +58,22 @@ def write_file(date,info,cmip):
     
     atts=Bunch(long_name="longitude",units="degrees")
     extra_vars.append(Bunch(name="lon",data=info.lon_data,dims=dims_2d,dtype="f",attributes=atts))
+   
     
-    #atts=Bunch(long_name="time",units="days since 0001-01-01 00:00:00")
-    atts=Bunch(long_name="time",units="days since 1850-01-01 00:00:00")
-    extra_vars.append(Bunch(name="time",data=cmip['time'],dims=dimsTime,dtype="f",attributes=atts))
-
+    atts=Bunch(long_name="time",units="days since 1850-01-01 00:00:00",
+    axis='T',
+    bounds='time_bnds',
+    standard_name='time',
+    title='time',
+    type='double',
+    calendar='noleap')
+    extra_vars.append(Bunch(name="time",data=cmip['time'],dims=dimsTime,dtype="d",attributes=atts))
+    
     atts=Bunch(long_name="xland",units="")
-    extra_vars.append(Bunch(name="xland",data=cmip["land"],dims=dims_2d,dtype="f",attributes=atts))
+    extra_vars.append(Bunch(name="xland",data=cmip["xland"],dims=dims_2d,dtype="d",attributes=atts))
 
 
     qvatts=Bunch(long_name="Specific Humidity",units="kg kg**-1")
-    
     # write to output file
     mygis.write(filename=filename,varname="qv",data=cmip.qv,dims=dims, attributes=qvatts,dtype="f",
                   extravars=extra_vars)#,history=" Produced by cmip2icar v."+info.version)

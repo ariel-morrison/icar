@@ -4,18 +4,22 @@ import config
 import io_routines
 import output
 import convert
+import netCDF4
 
 def main(info):
     
     for k in info.keys():
         if k!="times" and k!="lat_data" and k!="lon_data":
-            print(k,info[k])
+            print("k, info[k]:",k,info[k])
     
-    print(info.times[0],info.times[-1])
+    #print(info.times[0],info.times[-1])
 
     curyear=info.times[0].year
     lastyear=info.times[0].year-1
-    for curtime in info.times:
+    ncfile = netCDF4.Dataset(os.path.join(info.atmdir, info.atmfile), 'r')
+    time = ncfile.variables['time']
+    times = netCDF4.num2date(time[:], time.units, time.calendar)
+    for curtime in times:
         if curtime.year>lastyear:
             raw_data=io_routines.load_data(curtime,info)
             processed_data=convert.cmip2icar(raw_data)

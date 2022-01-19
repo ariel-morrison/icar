@@ -8,8 +8,9 @@ from models import awi,access,ccsm,fgoals,gfdl,ipsl
 from helpers.lib.bunch import Bunch
 
 import io_routines as io
+import netCDF4
 
-version="1.0"
+version="2.0"
 '''
 GCM_NAMES=dict(
     access="ACCESS1-3",
@@ -150,24 +151,22 @@ def parse():
                output_file=args.output.replace("GCM",args.model)+args.ensemble+"_"+args.experiment+"_",
                version=version)
     '''
-    start_date=datetime.datetime(1979,1,1,0,0,0)
-    end_date=datetime.datetime(2000,1,1,0,0,0)
+    start_date=datetime.datetime(1979,1,15,12,0,0)
+    end_date=datetime.datetime(2014,12,31,12,0,0)
 
     info=Bunch(lat=[float(45),float(72)],
                lon=[float(-136),float(-110)],
-               start_date=start_date,  end_date=end_date,
-               start_year=int(1979),experiment="historical",
+               start_date=start_date,  
+               end_date=end_date,
+               start_year=int(1979),
+               experiment="historical",
                ensemble="r10i1p1f1",
                model="CESM2",
                atmdir="/net/venus/kenes/user/amorrison/icar/forcing/", #args.dir,
-               #atmfile="CESM2_input_data_historical_r10i1p1f1_195001-201412_cropped.nc",
-               atmfile="test_data_time.nc",
+               atmfile="CESM2_historical_r10i1p1f1_195001-201412_withClouds_editedTA.nc",
                gcm_name="CESM2",
-               
-               #TBD
                read_pressure=global_vert_coords["cesm"],
-
-               orog_file="/net/venus/kenes/user/amorrison/icar/forcing/orog_fx_CESM2_historical_r10i1p1f1_gn.nc",
+               orog_file="/net/venus/kenes/user/amorrison/icar/forcing/orog_fx_CESM2_historical_r10i1p1f1_withSLP.nc",
                output_file="/net/venus/kenes/user/amorrison/icar/src/CESM2_r10i1p1f1_historical_",
                version=version)
 

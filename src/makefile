@@ -41,7 +41,7 @@
 #  Specify where you want the resulting executable installed
 ###################################################################
 ifndef INSTALLDIR
-	INSTALLDIR=~/bin/
+	INSTALLDIR=/net/venus/kenes/user/amorrison
 endif
 
 # Model directories
@@ -86,7 +86,7 @@ ifeq ($(PE_ENV),CRAY)
 endif
 
 ifndef FFTW
-	FFTW=${HOME}/usr/local
+	FFTW=/net/venus/kenes/user/amorrison/fftw
 endif
 FFTW_PATH = ${FFTW}
 LIBFFT = -L${FFTW_PATH}/lib -lm -lfftw3
@@ -101,7 +101,7 @@ ifdef FFTW_INC
 endif
 
 ifndef NETCDF
-	NETCDF=/usr/local
+	NETCDF=/net/venus/usr/local/netcdf
 	ifdef NETCDF_DIR
 		NETCDF=${NETCDF_DIR}
 	endif
@@ -122,6 +122,7 @@ endif
 ########################################################################################
 NODENAME := $(shell uname -n)
 
+COMPILER=gnu
 ifndef COMPILER
         find_gfortran=$(findstring gfortran, $(filter gfortran%,$(F90)))
         ifeq (gfortran, $(find_gfortran))
@@ -291,7 +292,7 @@ ifeq ($(COMPILER), gnu)
 				CAF_DIR=${HOME}/usr/local/lib
 			endif
 			CAF_FLAG=-fcoarray=lib
-			CAF_LINK=-L${CAF_DIR} -lcaf_mpi
+			CAF_LINK=-L${CAF_DIR} -lcaf_openmpi
 			ifneq ($(F90), ftn)
 				LINKER=mpif90
 			endif

@@ -1,25 +1,30 @@
 import numpy as np
+import numpy.ma as ma
 import units
+import math
 from helpers.lib.bunch import Bunch
 
 R=8.3144621 # J/mol/K
 cp=29.19 # J/mol/K   =1.012 J/g/K
 g=9.81 # m/s^2
+Rdg=29.286 # m/K
 
 def convert_atm(data,sfc):
     output_data=Bunch()
-    #                  [time,z,ns,ew]
     output_data.u  = data.u                   # m/s
     output_data.v  = data.v                   # m/s
     output_data.p  = data.p                   # Pa
     output_data.qv = data.qv                  # kg/kg
-    output_data.z = data.z
+    output_data.z = data.z                    # m
+    output_data.cloud = data.clw              # kg/kg
+    output_data.ice = data.cli                # kg/kg
     output_data.time = data.time
+    output_data.calendar = data.calendar
 
     pii = (100000.0 / output_data.p)**(R / cp)
     output_data.t = data.t * pii              # K (converted to potential temperature)
     
-    print(data.keys()) 
+    '''
     if "z" in data.keys():
         output_data.z=data.z                  # m
     else:
@@ -35,6 +40,7 @@ def convert_atm(data,sfc):
                                                   output_data.p[z_time],
                                                   t=output_data.t[z_time],
                                                   mr=output_data.qv[z_time])
+    '''
     
     # now calculate layer thicknesses
     output_data.dz=np.zeros(output_data.z.shape)
@@ -42,11 +48,8 @@ def convert_atm(data,sfc):
     output_data.dz[:,0,:,:]= 2 * (output_data.z[:,0,:,:]-sfc.hgt[np.newaxis,:,:])
     for i in range(1,output_data.z.shape[1]):
         output_data.dz[:,i,:,:]= 2 * np.mean(output_data.z[:,i,:,:]-output_data.z[:,i-1,:,:])-output_data.dz[:,i-1]
+        #output_data.dz[:,i,:,:]= output_data.z[:,i,:,:]-output_data.z[:,i-1,:,:]
     output_data.dz[0]=output_data.dz[1]
-    
-    output_data.cloud= np.zeros(data.qv.shape)
-    output_data.ice  = output_data.cloud
-    
     
     return output_data
 

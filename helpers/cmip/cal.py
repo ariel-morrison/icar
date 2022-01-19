@@ -1,11 +1,13 @@
 import numpy as np
 
-import datetime
+from datetime import datetime,timedelta
+from cftime import num2date,date2num
+#import datetime
 from helpers.lib import mygis
 from helpers.lib.bunch import Bunch
 
 days_per_month=[31,28,31,30,31,30,31,31,30,31,30,31]
-start_day_per_month=[0]
+start_day_per_month=[15]
 start_day_per_month.extend(np.cumsum(days_per_month))
 
 def std_date(model_time,roundseconds=True,y0=1850,m0=1,filename=None):
@@ -132,5 +134,6 @@ def noleap_date(model_time,roundseconds=True,y0=1850,m0=1,filename=None):
     date[3]=hour
     date[4]=minute
     date[5]=second
+    print("noleap_date: ", date)
     return date
     

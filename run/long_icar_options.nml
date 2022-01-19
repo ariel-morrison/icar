@@ -3,7 +3,7 @@
 !---------------------------------------------------------
 &model_version
     version = "2.0",                      ! This must match the version of the compiled code
-    comment = "ICAR test"     		  ! This will be stored in output files
+    comment = ""     		  ! This will be stored in output files
 /
 
 !---------------------------------------------------------
@@ -12,7 +12,7 @@
 &z_info
     ! use dz_levels as a guide but allow dz to vary in space so that z is constant in space at flat_z_height
     ! note spatially varying dz does not work well with linear_theory, use with wind=2 more options coming soon
-    ! space_varying = .False.
+    !space_varying = .False.
     !   height at which the z coordinate value should be constant in space (if space_varying=True), if < 0 make the model top flat (computed as sum(dz_levels) + mean(terrain))
     ! flat_z_height = -1
 
@@ -24,19 +24,18 @@
     ! Use a SLEVE vertical coordinate, where the decay of the large- and small-scale terrain influence towards model top is controlled by the decay_rate_L_topo and decay_rate_S_topo respectively (=H/s1 and H/s2), and the exponential factor n that controls compression across the z column. For higher n values, the terrain compression happens more in the mid to upper z levels (but always below flat_z_height), whereas for n=1 it is mainly at the lower levels, which may cause numerical issues if these are very thin. By setting s1=s2 a standard hybrid coordinate is obtained.
 
     sleve = .False.
-    terrain_smooth_windowsize = 4    ! Terrain is smoothed to obtain the large-scale terrain features
-    terrain_smooth_cycles = 5
-    decay_rate_L_topo = 2
-    decay_rate_S_topo = 6
-    sleve_n = 1.35
+    !terrain_smooth_windowsize = 4    ! Terrain is smoothed to obtain the large-scale terrain features
+    !terrain_smooth_cycles = 5
+    !decay_rate_L_topo = 2
+    !decay_rate_S_topo = 6
+    !sleve_n = 1.35
 
     !   Option to use the difference between forcing (lo-res) and hi-res terrain for terrain induced wind speedup (wind=2)
     use_terrain_difference = .True.
 
     !   Sample model level thickness [m]  Bottom levels could be thicker.
     !   NB: if using gfortran put all on one line
-    dz_levels = 50.,   75.,  125.,  200.,  300.,  400.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,    ! 1-20
-               !500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.     ! 20-40
+    dz_levels = 20., 50., 75.,  125.,  200.,  300.,  400.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500., 500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.,  500.  
 
 /
 
@@ -45,7 +44,7 @@
 !---------------------------------------------------------
 &output_list
     ! this is a list of variable names to be written in each output file
-    names = "lat","lon","terrain","u","v","ta2m","hus2m","clt", "precipitation", "swe", "snowfall"
+    names = "lat","lon","terrain","clt","swe","precipitation","graupel","snowfall","qv","nv","qs", "ns", "z", "pressure", "psfc", "temperature", "dz"
 
     ! These are the options for output variables.  Though they will only be output if they are computed internally
     ! "u", "v", "w_grid", "w",
@@ -61,12 +60,12 @@
     ! "land_mask", "terrain", "lat", "lon", "u_lat", "u_lon", "v_lat", "v_lon"
 
     outputinterval = 86400.   ! number of seconds between output time slices. 3600 = hourly, 2592000 = monthly
-    output_file = "output/icar_out_"    ! prefix name of output file (date will be appended)
+    output_file = "/kenes/user/amorrison/icar/src/out_CESM2_r10i1p1f1_historical_"    ! prefix name of output file (date will be appended)
     ! output_file_frequency = "monthly"   ! eventually this will be used to specify how frequently to create new files (not implemented yet)
 
     ! note that restart files will have ALL variables so that they can be used to restart ICAR
-    restartinterval = 15    ! number of outputs to skip restarts on
-    restart_file = "restart/icar_rst_"    ! prefix name of restart file (date will be appended)
+    !restartinterval = 30    ! number of outputs to skip restarts on
+    !restart_file = "restart/icar_rst_"    ! prefix name of restart file (date will be appended)
 /
 
 
@@ -83,12 +82,12 @@
 
     pbl = 0,  ! 1=legacy (deprecated)      2=Simple (Local HP96)        3=YSU             (N/A)
     lsm = 0,  ! 1=use prescribed fluxes    2=Simple LSM (N/A)           3=Noah LSM                  4=NoahMP (wishlist)
-    water=0,  ! 1=use prescribed (w/lsm=1) 2=Simple sea surface fluxes
-    mp  = 2,  ! 1=Thompson                 2=Simple (SB04)              3=Morrison                  4=WSM6      5=Thompson-Eidhammer
+    water=2,  ! 1=use prescribed (w/lsm=1) 2=Simple sea surface fluxes
+    mp  = 1,  ! 1=Thompson                 2=Simple (SB04)              3=Morrison                  4=WSM6      5=Thompson-Eidhammer
     rad = 0,  ! 1=use prescribed fluxes    2=Simple (empirical)         3=RRTMG           (wishlist)
     conv= 0,  ! 1=Tiedke Scheme            2=Simple Scheme (wishlist)   3=Kain-Fritsch
     adv = 1,  ! 1=Upwind                   2=MPDATA                     3=Adams-Bashforth (wishlist)
-    wind= 0   ! 1=Linear Theory
+    wind= 1   ! 1=Linear Theory
 /
 
 !---------------------------------------------------------
@@ -97,10 +96,10 @@
 &files_list
     !   This is the high-resolution input filename
     !   primary inputs from this file are lat, lon, and terrain, optionally soil and veg types
-    init_conditions_file="/net/venus/kenes/user/amorrison/icar/forcing/DEM.0.25-deg_cropped.nc"
+    init_conditions_file="/kenes/user/amorrison/icar/forcing/CESM2_dem_5_min_americas.nc"
 
     !   This is a list of the boundary conditions files -  number of files must match nfiles variable above
-    boundary_files="/net/venus/kenes/user/amorrison/icar/forcing/AWI-CM-1-1-MR_r1i1p1f1_ssp585_2016-01-01.nc",    
+    !boundary_files="/net/venus/kenes/user/amorrison/icar/src/file_list.txt",    
 
     !   This is a list of the external conditions files to be used for starting the model. Need to have same grid (!)
     ! external_files= "swe_t3_CH_2D.nc"
@@ -111,7 +110,7 @@
     !       ls -1 forcing/* | sed 's/$/"/g;s/^/"/g'>file_list.txt
     !   sed is used to add " around the filename.
     !   The quotes are probably only necessary if there are special characters or spaces on the line
-    !forcing_file_list = "/kenes/user/amorrison/icar/forcing/file_list.txt"
+    forcing_file_list = "/kenes/user/amorrison/icar/src/file_list.txt"
 
     !   Files to read "calibration" data from
     ! nsq_calibration_file = "nsq_calibration.nc",
@@ -123,28 +122,28 @@
 !---------------------------------------------------------
 &parameters
     !   Set this to the starting date of the first low-resolution forcing file
-    forcing_start_date = '2016-01-16 12:00:00',
+    forcing_start_date = '1979-01-15 12:00:00',
     !   Set this to the date to start running the model (defaults to the forcing_start_date)
-    start_date = "2016-01-16 12:00:00",
+    start_date = "1979-11-01 12:00:00",
     !   Set this to the date to stop running the model
-    end_date = "2016-01-31 12:00:00",
+    end_date = "1980-04-01 00:00:00",
     !   Calendar used by the forcing data "gregorian", "standard", "noleap", "365-day", "360-day"
-    calendar = "gregorian",
+    calendar = "noleap",
 
     !   The length of an input forcing time step
     inputinterval = 2592000,   ! [s]
 
     !   The output interval
-    outputinterval = 1296000.,  ! [s]
+    outputinterval = 86400.,  ! [s]
     !   The number of outputintervals (frames) that are written to one output file.
-    frames_per_outfile = 2
+    frames_per_outfile = 15
 
     !   Limit output data to near surface variables
     !   WARNING if true it is impossible to restart the run (for now)
-    ! surface_io_only = False,
+    surface_io_only = False,
 
     !   The grid spacing of the high-resolution data
-    dx = 55500.,        ! [m]
+    dx = 2000.,        ! [m]
 
     ! Specify the longitude coordinate system to use 0 = (default) don't change inputs, 1 = -180 to 180, 2 = 0 to 360, 3 = guess an appropriate value
     longitude_system = 1  ! [0,1,2,3]
@@ -164,7 +163,7 @@
     nz = 19, ! []
 
     !   Set this to true if the zvar in the input data is actually in units of geopotential height (m/s^2)
-    z_is_geopotential = True,
+    z_is_geopotential = False,
     !   Set this to true if the zvar in the input data is specified on model interfaces (as WRF geopotential height is)
     z_is_on_interface = True,
     !   Specify that the height of the forcing data will change through the simulation (common for atmospheric model-level output)
@@ -213,14 +212,14 @@
     ! mean_fields = false,
 
     !   Use this to restart the model restart_info must be supplied below
-    restart = false,
+    !restart = false,
 
     !   Use density in the advection step (violates linear theory assumptions)
     advect_density = False,
 
     !   Increases output print at runtime and tests domain wide values for realistic values throughout the simulation.
     debug = True,
-    warning_level = 9, ! 0-10 increases the level of errors it warns about and quits over (slightly)
+    warning_level = 5, ! 0-10 increases the level of errors it warns about and quits over (slightly)
 
     ! controls printing of % completed for longer processes.  Nice if it is running in a console, not nice in a log file.
     interactive = False,
@@ -229,9 +228,9 @@
     !   Read parameters for advection
     use_adv_options = False
     !   Read parameters for linear theory
-    use_lt_options = False
+    use_lt_options = True
     !   Read parameters for microphysics (primarily thompson only at this point)
-    use_mp_options = False
+    use_mp_options = True
     !   Read parameters for land surface model
     use_lsm_options = False
     !   Read parameters for online bias correction
@@ -248,22 +247,22 @@
 &var_list
     ! These are the names of the variables in the forcing data files
     ! variables on the mass / center grid
-    time_var= "time",       ! Time                      [defined in netcdf attributes] OPTIONAL
-    latvar  = "lat",       ! latitude                  [degrees]
-    lonvar  = "lon",      ! longitude                 [degrees]
-    pvar    = "p",          ! pressure                  [Pa]
+    time_var = "time",       ! Time                      [defined in netcdf attributes] OPTIONAL
+    latvar   = "lat",       ! latitude                  [degrees]
+    lonvar   = "lon",      ! longitude                 [degrees]
+    pvar     = "p",          ! pressure                  [Pa]
     !pbvar   = "ps",         ! base pressure state       [Pa]        OPTIONAL
-    tvar    = "theta",          ! temperature               [K]   (with optional offset)
-    qvvar   = "qv",     ! water vapor mixing ratio  [kg/kg]
-    qcvar   = "cloud",     ! cloud water mixing ratio  [kg/kg]     OPTIONAL
+    tvar     = "theta",          ! temperature               [K]   (with optional offset)
+    qvvar    = "qv",     ! water vapor mixing ratio  [kg/kg]
+    qcvar    = "cloud",     ! cloud water mixing ratio  [kg/kg]     OPTIONAL
     !qrvar   = "QRAIN",      ! rain water mixing ratio   [kg/kg]     OPTIONAL
     !qsvar   = "QSNOW",      ! snow mixing ratio         [kg/kg]     OPTIONAL
     !qnrvar  = "QNRAIN",     ! rain number concentration [kg^-1]     OPTIONAL
     !qgvar   = "QGRAUP",     ! graupel mixing ratio      [kg/kg]     OPTIONAL
     !qnivar  = "QNICE",      ! ice number concentration  [kg^-1]     OPTIONAL
-    qivar   = "ice",       ! cloud ice mixing ratio    [kg/kg]     OPTIONAL
-    hgtvar  = "hgt",        ! surface elevation         [m]
-    zvar    = "z",         ! model level elevations    [m or m/s^2 if z_is_geopotential]
+    qivar    = "ice",       ! cloud ice mixing ratio    [kg/kg]     OPTIONAL
+    hgtvar   = "hgt",        ! surface elevation         [m]
+    zvar     = "z",         ! model level elevations    [m or m/s^2 if z_is_geopotential]
     !zbvar   = "PHB",        ! base height state         [m or m/s^2] OPTIONAL
     !sst_var = "tas"         ! Water surface temperature [K]          OPTIONAL (used with water=2)
 
@@ -478,8 +477,8 @@
     ! Error checking will be performed and if the attributes above, or the spatial domain
     ! used to generate the LUT does not match the values for the current run it will regenerate the LUT.
     read_LUT  = False    ! read the Look up table from a specified file
-    write_LUT = False    ! write the look up table to the specified file
-    !LUT_filename = "Linear_Theory_LUT.nc"
+    write_LUT = True    ! write the look up table to the specified file
+    LUT_filename = "Linear_Theory_LUT"
 /
 
 
