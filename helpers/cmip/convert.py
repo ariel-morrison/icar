@@ -16,8 +16,8 @@ def convert_atm(data,sfc):
     output_data.p  = data.p                   # Pa
     output_data.qv = data.qv                  # kg/kg
     output_data.z = data.z                    # m
-    output_data.cloud = data.clw              # kg/kg
-    output_data.ice = data.cli                # kg/kg
+    #output_data.cloud = data.clw              # kg/kg
+    #output_data.ice = data.cli                # kg/kg
     output_data.time = data.time
     output_data.calendar = data.calendar
 

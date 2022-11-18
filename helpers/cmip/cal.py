@@ -7,7 +7,7 @@ from helpers.lib import mygis
 from helpers.lib.bunch import Bunch
 
 days_per_month=[31,28,31,30,31,30,31,31,30,31,30,31]
-start_day_per_month=[15]
+start_day_per_month=[1] # edit if monthly ==> 15
 start_day_per_month.extend(np.cumsum(days_per_month))
 
 def std_date(model_time,roundseconds=True,y0=1850,m0=1,filename=None):

@@ -71,6 +71,7 @@ def set_bounds(info):
                     .replace("_EXP_",info.experiment)              \
                     .replace("_GCM_",info.gcm_name)
     cmip_file=glob.glob(cmip_file)[0]
+    print("cmip file: ", cmip_file)
     varlist=["lat","lon"]
     
     lat=io.read_nc(cmip_file,varlist[0]).data
@@ -82,6 +83,7 @@ def set_bounds(info):
         print(lon.shape,len(lon.shape))
         raise ValueError("config.py requires lat,lon to be 1D arrays")
     lonbounds=np.where((lon>=info.lon[0])&(lon<=info.lon[1]))[0]
+    print(info.lon[0],info.lon[1])
     info.xmin=max(lonbounds[0]-1,0)
     info.xmax=min(lonbounds[-1]+1,len(lon))
     info.ymin=max(np.where(lat>=info.lat[0])[0][0]-1,0)
@@ -151,23 +153,23 @@ def parse():
                output_file=args.output.replace("GCM",args.model)+args.ensemble+"_"+args.experiment+"_",
                version=version)
     '''
-    start_date=datetime.datetime(1979,1,15,12,0,0)
-    end_date=datetime.datetime(2014,12,31,12,0,0)
+    start_date=datetime.datetime(2075,1,1,0,0,0)
+    end_date=datetime.datetime(2085,1,1,0,0,0)
 
     info=Bunch(lat=[float(45),float(72)],
                lon=[float(-136),float(-110)],
                start_date=start_date,  
                end_date=end_date,
-               start_year=int(1979),
-               experiment="historical",
+               start_year=int(2075),
+               experiment="ssp585",
                ensemble="r10i1p1f1",
                model="CESM2",
-               atmdir="/net/venus/kenes/user/amorrison/icar/forcing/", #args.dir,
-               atmfile="CESM2_historical_r10i1p1f1_195001-201412_withClouds_editedTA.nc",
+               atmdir="/kenes/user/amorrison/icar/src/", #args.dir,
+               atmfile="CESM2_day_r10i1p1f1_20750101-20841231_cropped_since1850_pressure.nc",
                gcm_name="CESM2",
                read_pressure=global_vert_coords["cesm"],
-               orog_file="/net/venus/kenes/user/amorrison/icar/forcing/orog_fx_CESM2_historical_r10i1p1f1_withSLP.nc",
-               output_file="/net/venus/kenes/user/amorrison/icar/src/CESM2_r10i1p1f1_historical_",
+               orog_file="/kenes/user/amorrison/icar/forcing/daily/CESM2_r10i1p1f1_day_surface_180_cropped_FV.nc",
+               output_file="/kenes/user/amorrison/icar/src/CESM2_r10i1p1f1_ssp585_",
                version=version)
 
     return info

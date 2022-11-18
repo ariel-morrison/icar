@@ -6,8 +6,8 @@ from helpers.lib.bunch import Bunch
 from helpers.lib import mygis
 
 g=9.8
-atmvarlist=["ta","hus","ua","va","zg","clw","cli"]
-icar_atm_var=["t","qv","u","v","z","cloud","ice"]
+atmvarlist=["ta","hus","ua","va","zg"] # can also add clw,cli
+icar_atm_var=["t","qv","u","v","z"]    # can also add cloud,ice
 
 # from mygis, modified to work with netCDF4
 def read_nc(filename,var="data",proj=None,returnNCvar=False):
@@ -35,7 +35,6 @@ def read_nc(filename,var="data",proj=None,returnNCvar=False):
                 outputdata=data[:ntimes,...]
             else:
                 print(var)
-                print(data.dtype)
                 outputdata=data[:]
     outputproj=None
     if proj!=None:
@@ -92,6 +91,7 @@ def load_atm(time,info):
 
     outputdata.ntimes=0
     for atmfile in atmfile_list:
+        '''
         varname="psl"
         nc_data=read_nc(atmfile,varname)
         newdata=nc_data.data[:,info.ymin:info.ymax,info.xmin:info.xmax]
@@ -99,7 +99,8 @@ def load_atm(time,info):
             outputdata[varname]=np.concatenate([outputdata[varname],newdata])
         else:
             outputdata[varname]=newdata
-        
+        '''
+
         varname="p"
         newdata=info.read_pressure(atmfile)[:,:,info.ymin:info.ymax,info.xmin:info.xmax]
         if varname in outputdata:
@@ -115,7 +116,7 @@ def load_atm(time,info):
             outputdata[varname]=np.concatenate([outputdata[varname],newdata])
         else:
             outputdata[varname]=newdata
-        
+        '''
         #to read cloud info:
         varname="clw"
         nc_data=read_nc(atmfile,varname)
@@ -132,7 +133,7 @@ def load_atm(time,info):
             outputdata[varname]=np.concatenate([outputdata[varname],newdata])
         else:
             outputdata[varname]=newdata
-
+        '''
     #outputdata.times=info.read_time(atmfile)
     try:
         calendar = mygis.read_attr(atmfile_list[0], "calendar", varname="time")
@@ -152,7 +153,6 @@ def load_sfc(time,info):
     # sstfile=find_sst_file(time)
     # outputdata.sst=read_nc(sstfile,"sst").data[:,info.ymin:info.ymax,info.xmin:info.xmax]
 
-    outputdata.ps=read_nc(basefile,"psl").data[:,info.ymin:info.ymax,info.xmin:info.xmax]
 
     outputdata.xland=np.zeros(outputdata.hgt.shape)
     landfrac=read_nc(basefile,"sftlf").data[info.ymin:info.ymax,info.xmin:info.xmax]

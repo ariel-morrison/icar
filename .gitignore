@@ -12,3 +12,7 @@ docs/doxygen_sqlite3.db
 *~
 *.pyc
 *.ipynb
+output
+run/extra
+src_for_tutorial
+src/*.sh

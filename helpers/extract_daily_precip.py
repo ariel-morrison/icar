@@ -39,7 +39,7 @@ import argparse
 import glob
 
 import numpy as np
-import mygis
+from helpers.lib import mygis
 
 global verbose
 
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     try:
         parser= argparse.ArgumentParser(description='Create a daily precipitation file from ICAR output files. ',
                                         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        parser.add_argument('filesearch',nargs="?",         action='store',     default="icar_*.nc",
+        parser.add_argument('filesearch',nargs="?",         action='store',     default="out_*.nc",
                             help="glob pattern to search for icar output files")
         parser.add_argument('-o',        dest="outputfile", action='store',     default="daily_precip.nc",
                             help="name of outputfile")

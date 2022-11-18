@@ -1,0 +1,21 @@
+&model_version
+version=2.0,comment="BC precip downscaling, CESM2_r11i1p1f1"
+/
+&output_list
+names="lat","lon","terrain","precipitation","snowfall","pressure","temperature","z","swe","ts",outputinterval=3600,output_file="/kenes/user/amorrison/icar/output/farfuture/out_CESM2_r11i1p1f1_ssp585_"
+/
+&physics
+pbl=0,lsm=0,water=2,mp=1,rad=0,conv=1,adv=1,wind=1
+/
+&files_list
+init_conditions_file="/kenes/user/amorrison/icar/forcing/xland_cropped3D.nc",boundary_files="/kenes/user/amorrison/icar/src/CESM_6hrLev_ssp585_r11i1p1f1_gn_203501010000-205412311800.nc"
+/
+&parameters
+forcing_start_date="2035-11-01 00:00:00",end_date="2036-04-30 23:00:00",calendar="365-day",inputinterval=21600,dx=9000.0,frames_per_outfile=24,qv_is_spec_humidity=true,readdz=true,nz=16,z_is_geopotential=false,z_is_on_interface=false,time_varying_z=true,use_agl_height=False,t_is_potential=false,smooth_wind_distance=100000
+/
+&var_list
+uvar="ua",vvar="va",pvar="p",tvar="ta",qvvar="hus",hgtvar="orog",zvar="z",latvar="lat",lonvar="lon",lat_hi="lat",lon_hi="lon",hgt_hi="height",time_var="time",landvar="xland"
+/
+&z_info
+dz_levels=60.,125.,150.,200.,300.,400.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.,500.
+/

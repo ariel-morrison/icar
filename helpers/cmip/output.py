@@ -17,7 +17,7 @@ def write_file(date,info,cmip):
     # z
     # 2D variables (constant in time)
     # hgt, latitude, longitude
-    
+    ''' 
     atts=Bunch(long_name="Cloud liquid water content",units="kg kg**-1")
     extra_vars.append(Bunch(name="cloud",data=cmip["cloud"],dims=dims,dtype="f",attributes=atts))
 
@@ -27,7 +27,7 @@ def write_file(date,info,cmip):
     # used as primary variable in io.write
     # atts=Bunch(long_name="Specific Humidity",units="kg kg**-1")
     # extra_vars.append(Bunch(name="qv",data=cmip["qv"],dims=dims,dtype="f",attributes=atts))
-
+    '''
     atts=Bunch(long_name="U (E/W) wind speed",units="m s**-1")
     extra_vars.append(Bunch(name="u",data=cmip["u"],dims=dims,dtype="f",attributes=atts))
 
@@ -40,8 +40,8 @@ def write_file(date,info,cmip):
     atts=Bunch(long_name="Pressure",units="Pa")
     extra_vars.append(Bunch(name="p",data=cmip["p"],dims=dims,dtype="f",attributes=atts))
     
-    atts=Bunch(long_name="Surface pressure",units="Pa")
-    extra_vars.append(Bunch(name="ps",data=cmip["ps"],dims=dims_3d,dtype="f",attributes=atts))
+    #atts=Bunch(long_name="Surface pressure",units="Pa")
+    #extra_vars.append(Bunch(name="ps",data=cmip["ps"],dims=dims_3d,dtype="f",attributes=atts))
 
     atts=Bunch(long_name="Layer thicknesses",units="m")
     extra_vars.append(Bunch(name="dz",data=cmip["dz"].astype("f"),dims=dims,dtype="f",attributes=atts))
@@ -58,20 +58,18 @@ def write_file(date,info,cmip):
     
     atts=Bunch(long_name="longitude",units="degrees")
     extra_vars.append(Bunch(name="lon",data=info.lon_data,dims=dims_2d,dtype="f",attributes=atts))
-   
-    
+        
     atts=Bunch(long_name="time",units="days since 1850-01-01 00:00:00",
     axis='T',
     bounds='time_bnds',
     standard_name='time',
     title='time',
     type='double',
-    calendar='noleap')
+    calendar='365-day')
     extra_vars.append(Bunch(name="time",data=cmip['time'],dims=dimsTime,dtype="d",attributes=atts))
     
     atts=Bunch(long_name="xland",units="")
     extra_vars.append(Bunch(name="xland",data=cmip["xland"],dims=dims_2d,dtype="d",attributes=atts))
-
 
     qvatts=Bunch(long_name="Specific Humidity",units="kg kg**-1")
     # write to output file

@@ -13,7 +13,7 @@ pool = None
 
 # This should be an input, this is the search string that is assumed to match
 # the output files to be aggregated.
-file_search = "out_CESM2_r10i1p1f1_historical_{ens}_*"
+file_search = "out_CESM2_r11i1p1f1_ssp585_{ens}_*"
 
 
 def load_file(file_name):
@@ -159,7 +159,7 @@ def agg_file(first_file, verbose=True):
     print(outputfile)
     data_set.to_netcdf(outputfile)
 
-def main(file_search = "out_CESM2_r10i1p1f1_historical_{ens}_*"):
+def main(file_search = file_search):
     first_files = glob.glob(file_search.format(ens="000001"))
     first_files.sort()
 
